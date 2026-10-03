@@ -1,0 +1,49 @@
+name: ticketing-system
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: ticketing-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ticketing
+      POSTGRES_PASSWORD: ticketing
+      POSTGRES_DB: ticketing
+    ports:
+      - "5433:5432"
+    volumes:
+      - ticketing-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ticketing -d ticketing"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: ticketing-redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "6379:6379"
+    volumes:
+      - ticketing-redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  adminer:
+    image: adminer:4
+    container_name: ticketing-adminer
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  ticketing-postgres-data:
+  ticketing-redis-data:

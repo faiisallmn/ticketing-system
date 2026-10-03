@@ -1,0 +1,160 @@
+@import "tailwindcss";
+
+@plugin "@tailwindcss/typography";
+
+/* Dark theme is an explicit opt-in via [data-theme="dark"], never the OS default,
+   so server and client always agree on first paint. */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+@theme inline {
+  --font-sans: var(--font-schibsted), ui-sans-serif, system-ui, sans-serif;
+
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-sunken: var(--surface-sunken);
+  --color-line: var(--line);
+  --color-ink: var(--ink);
+  --color-muted: var(--ink-muted);
+  --color-faint: var(--ink-faint);
+  --color-accent: var(--accent);
+  --color-accent-fill: var(--accent-fill);
+  --color-accent-soft: var(--accent-soft);
+  --color-st-open: var(--st-open);
+  --color-st-progress: var(--st-progress);
+  --color-st-waiting: var(--st-waiting);
+  --color-st-resolved: var(--st-resolved);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+}
+
+:root {
+  --bg: #f3f4f2;
+  --surface: #fbfbfa;
+  --surface-sunken: #e9ebe8;
+  --line: #d9dcd7;
+  --ink: #1c2320;
+  --ink-muted: #5b655f;
+  --ink-faint: #8a938d;
+  --accent: #2b4fd8;
+  --accent-fill: #2b4fd8;
+  --accent-soft: #e4e9fb;
+  --st-open: #2b4fd8;
+  --st-progress: #b7791f;
+  --st-waiting: #6b7280;
+  --st-resolved: #2f7d4f;
+  --danger: #c0392b;
+  --danger-soft: #f9e8e5;
+  --warn: #c77d0a;
+  --warn-soft: #f7edd8;
+  color-scheme: light;
+}
+
+[data-theme="dark"] {
+  --bg: #121715;
+  --surface: #181e1b;
+  --surface-sunken: #202825;
+  --line: #2a332f;
+  --ink: #e6eae7;
+  --ink-muted: #9ba6a1;
+  --ink-faint: #6e7a75;
+  --accent: #8ba0ec;
+  --accent-fill: #3d5bdd;
+  --accent-soft: #22304f;
+  --st-open: #8ba0ec;
+  --st-progress: #d6a04a;
+  --st-waiting: #9aa1a8;
+  --st-resolved: #5aa87c;
+  --danger: #e0685c;
+  --danger-soft: #3a2422;
+  --warn: #dda04a;
+  --warn-soft: #3a2e1c;
+  color-scheme: dark;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 20px;
+}
+
+/* One visible keyboard focus state everywhere. */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Hatched segment for paused SLA clocks. */
+.hatch {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    var(--ink-faint) 0,
+    var(--ink-faint) 2px,
+    transparent 2px,
+    transparent 6px
+  );
+}
+
+/* Keyboard-selected queue row: soft background plus accent edge. */
+[data-ticket-row][data-active="true"] {
+  background: var(--accent-soft);
+  box-shadow: inset 2px 0 0 var(--accent);
+}
+
+/* Compact queue density. */
+[data-queue-table][data-density="compact"] [data-ticket-row] > td {
+  padding-top: 2px;
+  padding-bottom: 2px;
+}
+
+/* Loading skeletons that match row heights. */
+@keyframes skeleton-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+
+.skeleton {
+  animation: skeleton-pulse 1.6s ease-in-out infinite;
+  background: var(--surface-sunken);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Knowledge-base prose reads from the same tokens in both themes. */
+.prose {
+  --tw-prose-body: var(--ink);
+  --tw-prose-headings: var(--ink);
+  --tw-prose-lead: var(--ink-muted);
+  --tw-prose-links: var(--accent);
+  --tw-prose-bold: var(--ink);
+  --tw-prose-counters: var(--ink-muted);
+  --tw-prose-bullets: var(--ink-faint);
+  --tw-prose-hr: var(--line);
+  --tw-prose-quotes: var(--ink-muted);
+  --tw-prose-quote-borders: var(--line);
+  --tw-prose-captions: var(--ink-muted);
+  --tw-prose-code: var(--ink);
+  --tw-prose-pre-code: var(--ink);
+  --tw-prose-pre-bg: var(--surface-sunken);
+  --tw-prose-th-borders: var(--line);
+  --tw-prose-td-borders: var(--line);
+  font-size: 14px;
+  line-height: 22px;
+  max-width: 72ch;
+}
