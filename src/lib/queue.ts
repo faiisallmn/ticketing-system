@@ -13,19 +13,26 @@ function createConnection(): IORedis {
 }
 
 /**
- * Shared connection for enqueuing from Server Actions / Route Handlers.
- * The worker process creates its own connections in `src/worker.ts`.
+ * Shared queue for enqueuing from Server Actions / Route Handlers, created on
+ * first use so that importing this module (e.g. during `next build`) doesn't
+ * open a Redis connection. The worker process creates its own connections in
+ * `src/worker.ts`.
  */
-export const queueConnection = createConnection();
+const globalForQueue = globalThis as unknown as { ticketQueue?: Queue };
 
-export const ticketQueue = new Queue("ticketing", { connection: queueConnection });
+function getTicketQueue(): Queue {
+  if (!globalForQueue.ticketQueue) {
+    globalForQueue.ticketQueue = new Queue("ticketing", { connection: createConnection() });
+  }
+  return globalForQueue.ticketQueue;
+}
 
 export async function enqueueAutoAssign(ticketId: string): Promise<void> {
   // No custom jobId: BullMQ deduplicates against completed jobs too, which
   // would silently swallow re-enqueues (e.g. after an escalation unassigns
   // the ticket). The processor is idempotent — already-assigned tickets are
   // skipped — so duplicate deliveries are harmless.
-  await ticketQueue.add(
+  await getTicketQueue().add(
     "auto-assign",
     { ticketId },
     { removeOnComplete: 100, removeOnFail: 500 },
@@ -33,7 +40,7 @@ export async function enqueueAutoAssign(ticketId: string): Promise<void> {
 }
 
 export async function enqueueEmail(emailId: string): Promise<void> {
-  await ticketQueue.add(
+  await getTicketQueue().add(
     "send-email",
     { emailId },
     { attempts: 3, backoff: { type: "exponential", delay: 10000 }, removeOnComplete: 200, removeOnFail: 500 },
@@ -41,7 +48,7 @@ export async function enqueueEmail(emailId: string): Promise<void> {
 }
 
 export async function enqueueWebhookDelivery(deliveryId: string): Promise<void> {
-  await ticketQueue.add(
+  await getTicketQueue().add(
     "webhook-delivery",
     { deliveryId },
     { attempts: 5, backoff: { type: "exponential", delay: 30000 }, removeOnComplete: 200, removeOnFail: 500 },
