@@ -1,0 +1,8 @@
+[build.environment]
+  # Turbopack's persistent build cache snapshots the build environment
+  # (including secret values). It is internal build state and is never
+  # served, so exclude it from Netlify's secrets scan.
+  SECRETS_SCAN_OMIT_PATHS = ".netlify/.next/cache/**,.next/cache/**"
+  # Public, non-secret configuration that legitimately appears in the server
+  # bundle (site URLs, sender address, upload limit).
+  SECRETS_SCAN_OMIT_KEYS = "AUTH_URL,APP_URL,EMAIL_FROM,MAX_UPLOAD_BYTES"
